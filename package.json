@@ -17,5 +17,8 @@
     "mongoose": "^5.9.22",
     "password-hash": "^1.2.2",
     "winston": "^3.3.3"
+  },
+  "engines": {
+    "node": "12.15.0"
   }
 }
