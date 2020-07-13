@@ -54,11 +54,21 @@ acUtils.getAgencyClientData = async () => {
                 }
             },
             {
-                $sort: { maxBillAmount : -1}
+                $group : 
+                {
+                    _id: "$maxBillAmount",
+                    data: { $push : { agencyId: "$_id", agencyName: "$name", clientName: "$clients.name" }}
+                }  
+            },
+            {
+                $sort: { _id : -1}
+            },
+            {
+                $limit: 1
             }
         ]);
 
-        return result;
+        return result.length ? { maxBillAmount: result[0]._id, data: result[0].data} : {};
 
     } catch (err) {
         throw err;
@@ -73,4 +83,18 @@ acUtils.updateClient = async (clientId, data) => {
         throw err;
     }
 }
+
+acUtils.checkAgencyName = async (agencyName) => {
+    try {
+        const agencyData = await agencyModel.find({ name: agencyName });
+        if (agencyData) {
+            return agencyData[0];
+        } else {
+            return false;
+        }
+    } catch (err) {
+        throw err;
+    }
+};
+
 module.exports = acUtils;

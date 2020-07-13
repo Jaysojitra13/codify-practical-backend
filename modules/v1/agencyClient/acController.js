@@ -13,57 +13,33 @@ const acController = {};
 acController.create = async (req, res) => {
     try {
 
-        const { 
-            type,
-            name,
-            state,
-            address1,
-            city,
-            phoneNumber,
-            address2,
-            agencyId,
-            email,
-            totalBill
-        } = req.body;
+        const { agencyDetails, clientDetails } = req.body;
 
-        let objToSave = {};
+        let agency;
+        const agencyNameExist = await acUtils.checkAgencyName(agencyDetails.name);
 
-        if (type === 'agency') {
-            objToSave = {
-                name,
-                state,
-                address1,
-                address2: address2 || '',
-                city,
-                phoneNumber
-            };
-
-            const agencyData = new agencyModel(objToSave);
-            const result = await agencyData.save();
-            return res.status(STANDARD.CREATED).json({
-                message: "Agency created successfully!",
-                data: result
-              });
+        if (agencyNameExist) {
+            agency = agencyNameExist;
+        } else {
+            const agencyData = new agencyModel(agencyDetails);
+            agency = await agencyData.save();
         }
 
-        if (type === 'client') {
-            objToSave = {
-                name,
-                agencyId,
-                email,
-                totalBill,
-                phoneNumber
-            };
+        const clientObj = {
+            name: clientDetails.name,
+            agencyId: agency._id,
+            email: clientDetails.email,
+            totalBill: clientDetails.totalBill,
+            phoneNumber: clientDetails.phoneNumber
+        };
 
-            const checkAgency = await acUtil.checkAgencyExist(agencyId);
+        const clientData = new clientModel(clientObj);
+        const client = await clientData.save();
 
-            const clientData = new clientModel(objToSave);
-            const result = await clientData.save();
-            return res.status(STANDARD.CREATED).json({
-                message: "Client created successfully!",
-                data: result
-              });
-        }
+        return res.status(STANDARD.CREATED).json({
+            message: "success",
+            data: { agencyDetails: agency, clientDetails: client }
+        });
     } catch (err) {
         return res.status(ERROR404.CODE).json({
             message: err.message,

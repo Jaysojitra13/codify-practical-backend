@@ -8,8 +8,7 @@ const {
 const agencyRouter = express.Router();
 
 
-
-agencyRouter.post('/create', acMiddelware.validateInput(), acController.create);
+agencyRouter.post('/create', acMiddelware.validateInput("create"), acController.create);
 
 agencyRouter.get('/data', acController.agencyClientData);
 

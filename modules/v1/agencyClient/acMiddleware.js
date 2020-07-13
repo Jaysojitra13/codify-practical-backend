@@ -13,46 +13,37 @@ const {
 
 acMiddelware.validateInput = (validationType) => { 
     return function (req, res, next) {
-        const { type } = req.body;
         
-        if (type) {
-            const enumarr = ['agency', 'client'];
-            if (enumarr.indexOf(type) >= 0) {
-                let acValidators = {};
-                const validators = acValidator.getValidator(req, type);
-                acValidators = validators
-        
-                const error = _v.validate(req.body, acValidators);
+        const body = req.body;
+        const validators = acValidator.getValidator(req, validationType);
+
+        if (validationType === 'create') {
+            let message = '';
+            let isError = false;
+            for (let b in body) {
+                const error = _v.validate(body[b], validators[b]);
                 if (error) {
-                    return res.status(ERROR422.CODE).json({
-                        message: error
-                    });
+                    isError = true;
+                    message = error;
+                    break;
                 }
-                next();
-            } else {
-                return res.status(ERROR400.CODE).json({
-                    message: "Value of the type must be 'agency' or 'client'"
+            }
+            if (isError) {
+                return res.status(ERROR422.CODE).json({
+                    message
                 });
             }
-        } else if (validationType) {
-            let acValidators = {};
-            const validators = acValidator.getValidator(req, validationType);
-            acValidators = validators
-    
-            const error = _v.validate(req.body, acValidators);
+            next();
+        } else {
+            const error = _v.validate(req.body, validators);
             if (error) {
                 return res.status(ERROR422.CODE).json({
                     message: error
                 });
             }
             next();
-        } else {
-            return res.status(ERROR422.CODE).json({
-                message: "Type is required"
-            });
         }
 
-        
     };
 };
 
