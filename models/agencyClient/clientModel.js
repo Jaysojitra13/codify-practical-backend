@@ -4,6 +4,7 @@ const {
   Schema,
 } = mongoose;
 
+// New comment
 // Schema
 const clientSchema = new Schema({
   name: {
